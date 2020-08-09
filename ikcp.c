@@ -1243,6 +1243,26 @@ int ikcp_interval(ikcpcb *kcp, int interval)
 	return 0;
 }
 
+/*
+ * kcp的快速重传机制 - 无延迟ACK回复模式
+ * 
+ * 如果开启了kcp的快速重传机制，并且设置了resend参数的时候。当kcp
+ * 确认重复的ACK个数大于resend的时候，就不会等到超时而直接重发包。
+ *
+ * 例如，发送1,2,3,4,5包，但是收到的ACK:1,3,4,5。当收到ACK为3的时候，
+ * kcp确认2包被跳过1次，收到ACK为4的时候，kcp确认2包被跳过2次。如果
+ * 设置了resend为2的话，当收到ACK为5的时候就超过了resend的值。于是
+ * kcp选择不等待超时而直接重传。
+ *
+ * 这就是kcp的快速重传机制。
+ *
+ * @params
+ *
+ * nodelay: 0 不启用，1 启用
+ * interval: 内部flush刷新时间
+ * resend: 0 表示关闭
+ * nc: 是否关闭拥塞控制，0 表示不关闭，1 表示关闭
+ */
 int ikcp_nodelay(ikcpcb *kcp, int nodelay, int interval, int resend, int nc)
 {
 	if (nodelay >= 0) {
